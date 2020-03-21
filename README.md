@@ -3,7 +3,7 @@ Python Library and Tools to Backup Personal Saved and Upvoted Posts and Comments
 
 ---
 ## User Guide
-#### User Setup
+### User Setup
 This package currently supports Python versions 3.7 and 3.8.
 
 It is recommended that you use the latest versions pip, venv, and poetry. These can be installed on an Ubuntu 18.04 system as follows:
