@@ -10,6 +10,9 @@ authors = ["James Lewellyn <styyle14@gmail.com>"]
 maintainers = ["James Lewellyn <styyle14@gmail.com>"]
 license = "MIT"
 
+[tool.poetry.scripts]
+pymyredditbackup = 'pymyredditbackup.pymyredditbackup:main'
+
 [tool.poetry.dependencies]
 python = "^3.7"
 
