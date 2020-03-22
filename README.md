@@ -31,6 +31,10 @@ Usage has yet to be defined.
 ### Developer Setup
 Please follow all steps in the above "User Setup" section. Note that you must have both Python versions 3.7 and 3.8 installed to run `tox` before making pull requests.
 
+To install tox, run:
+
+`python3 -m pip install --user --upgrade tox`
+
 ### Developer Source Installation
 Clone down the repo:
 
