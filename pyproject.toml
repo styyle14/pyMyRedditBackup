@@ -44,3 +44,6 @@ flake8-string-format = "*"
 flake8-typing-imports = "*"
 pep8-naming = "*"
 pytest = "^4.6"
+
+[tool.black]
+line-length = 120
