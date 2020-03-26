@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# PRAW (don't commit actual client_id or client_secret)
+praw.ini
