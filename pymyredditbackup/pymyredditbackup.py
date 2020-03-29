@@ -70,6 +70,13 @@ def praw_get_my_upvoted(redditor: praw.models.Redditor) -> None:
             logging.info("Upvoted comment: %s", thing.body)
 
 
+def praw_get_my_messages(reddit: praw.Reddit) -> None:
+    """Get the redditor's comments."""
+    for message in reddit.inbox.all(limit=None):
+        if isinstance(message, praw.models.Message):
+            logging.info("Message subject: %s", message.subject)
+
+
 def main() -> None:
     """Do the main thing."""
     # Get arguments
@@ -105,10 +112,11 @@ def main() -> None:
         logging.critical("Login authentication error: Wrong username or password")
         logging.debug("Traceback: ", exc_info=True)
         sys.exit(ExitCode.INVALID_LOGIN_INFORMATION.value)
-    # Print out all ids of user's comments, in newest order
+    # Print out all ids of user's data, in newest order
     praw_get_my_comments(reddit.user.me())
     praw_get_my_submissions(reddit.user.me())
     praw_get_my_saved(reddit.user.me())
     praw_get_my_upvoted(reddit.user.me())
+    praw_get_my_messages(reddit)
     # Successful exit
     sys.exit(ExitCode.SUCCESS.value)
