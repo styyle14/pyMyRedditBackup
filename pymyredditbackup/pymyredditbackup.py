@@ -43,13 +43,31 @@ def praw_reddit_from_ini(praw_ini_path: str) -> praw.Reddit:
 def praw_get_my_comments(redditor: praw.models.Redditor) -> None:
     """Get the redditor's comments."""
     for comment in redditor.comments.new(limit=None):
-        logging.info("Comment: %s", comment.body)
+        logging.info("User comment: %s", comment.body)
 
 
 def praw_get_my_submissions(redditor: praw.models.Redditor) -> None:
     """Get the redditor's comments."""
     for submission in redditor.submissions.new(limit=None):
-        logging.info("Submission: %s", submission.title)
+        logging.info("User submission: %s", submission.title)
+
+
+def praw_get_my_saved(redditor: praw.models.Redditor) -> None:
+    """Get the redditor's comments."""
+    for thing in redditor.saved(limit=None):
+        if isinstance(thing, praw.models.Submission):
+            logging.info("Saved submission: %s", thing.title)
+        elif isinstance(thing, praw.models.Comment):
+            logging.info("Save comment: %s", thing.body)
+
+
+def praw_get_my_upvoted(redditor: praw.models.Redditor) -> None:
+    """Get the redditor's comments."""
+    for thing in redditor.upvoted(limit=None):
+        if isinstance(thing, praw.models.Submission):
+            logging.info("Upvoted submission: %s", thing.title)
+        elif isinstance(thing, praw.models.Comment):
+            logging.info("Upvoted comment: %s", thing.body)
 
 
 def main() -> None:
@@ -90,5 +108,7 @@ def main() -> None:
     # Print out all ids of user's comments, in newest order
     praw_get_my_comments(reddit.user.me())
     praw_get_my_submissions(reddit.user.me())
+    praw_get_my_saved(reddit.user.me())
+    praw_get_my_upvoted(reddit.user.me())
     # Successful exit
     sys.exit(ExitCode.SUCCESS.value)
