@@ -2,6 +2,7 @@
 """Contains the main package functionality."""
 
 import argparse
+import enum
 import getpass
 import logging
 import os
@@ -12,6 +13,14 @@ import tempfile
 import praw
 
 import prawcore
+
+
+class ExitCode(enum.Enum):  # noqa: H601
+    """Provides exit codes for scripts."""
+
+    INVALID_PRAW_INI_FILE = 1
+    INVALID_CLIENT_INFORMATION = 2
+    INVALID_LOGIN_INFORMATION = 3
 
 
 def praw_reddit_from_ini(praw_ini_path: str) -> None:
@@ -51,15 +60,15 @@ def main() -> None:
         logging.debug("Using praw.ini file: %s", praw_ini_path)
     else:
         logging.critical("Given path is not a file: %s", praw_ini_path)
-        sys.exit(1)
+        sys.exit(ExitCode.INVALID_PRAW_INI_FILE.value)
     try:
         reddit = praw_reddit_from_ini(praw_ini_path)
         logging.info("Status: %s", reddit.user.me())
     except prawcore.exceptions.ResponseException:
         logging.critical("Unauthorized client error: Wrong client_id or client_secret in praw.ini")
         logging.debug("Traceback: ", exc_info=True)
-        sys.exit(2)
+        sys.exit(ExitCode.INVALID_CLIENT_INFORMATION.value)
     except prawcore.exceptions.OAuthException:
         logging.critical("Login authentication error: Wrong username or password")
         logging.debug("Traceback: ", exc_info=True)
-        sys.exit(3)
+        sys.exit(ExitCode.INVALID_LOGIN_INFORMATION.value)
