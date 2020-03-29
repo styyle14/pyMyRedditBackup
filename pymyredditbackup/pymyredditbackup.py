@@ -6,6 +6,7 @@ import enum
 import getpass
 import logging
 import os
+import pathlib
 import shutil
 import sys
 import tempfile
@@ -18,23 +19,37 @@ import prawcore
 class ExitCode(enum.Enum):  # noqa: H601
     """Provides exit codes for scripts."""
 
+    SUCCESS = 0
     INVALID_PRAW_INI_FILE = 1
     INVALID_CLIENT_INFORMATION = 2
     INVALID_LOGIN_INFORMATION = 3
 
 
-def praw_reddit_from_ini(praw_ini_path: str) -> None:
+def praw_reddit_from_ini(praw_ini_path: str) -> praw.Reddit:
     """Get Reddit instance from praw.ini file."""
     with tempfile.TemporaryDirectory() as temp_dir:
-        logging.debug("Temp dir: %s", temp_dir)
+        temp_dir_path = pathlib.Path(temp_dir)
+        logging.debug("Temp dir: %s", temp_dir_path)
         # Change to temporary directory. PRAW reads praw.ini from pwd
-        os.chdir(temp_dir)
-        shutil.copy(praw_ini_path, temp_dir + "/praw.ini")
-        logging.debug("Temp dir contents: %s", os.listdir(temp_dir))
+        os.chdir(temp_dir_path)
+        shutil.copy(praw_ini_path, temp_dir_path / "praw.ini")
+        logging.debug("Temp dir contents: %s", os.listdir(temp_dir_path))
         # Get login information. This must be a user who is autorized with the app
         username = input("Username: ")
         password = getpass.getpass()
-        return praw.Reddit(username=username, password=password, user_agent=f"pyMyRedditBackup")
+        return praw.Reddit(username=username, password=password, user_agent="pyMyRedditBackup")
+
+
+def praw_get_my_comments(redditor: praw.models.Redditor) -> None:
+    """Get the redditor's comments."""
+    for comment in redditor.comments.new(limit=None):
+        logging.info("Comment: %s", comment.body)
+
+
+def praw_get_my_submissions(redditor: praw.models.Redditor) -> None:
+    """Get the redditor's comments."""
+    for submission in redditor.submissions.new(limit=None):
+        logging.info("Submission: %s", submission.title)
 
 
 def main() -> None:
@@ -63,7 +78,7 @@ def main() -> None:
         sys.exit(ExitCode.INVALID_PRAW_INI_FILE.value)
     try:
         reddit = praw_reddit_from_ini(praw_ini_path)
-        logging.info("Status: %s", reddit.user.me())
+        logging.debug("Login successful for %s.", reddit.user.me())
     except prawcore.exceptions.ResponseException:
         logging.critical("Unauthorized client error: Wrong client_id or client_secret in praw.ini")
         logging.debug("Traceback: ", exc_info=True)
@@ -72,3 +87,8 @@ def main() -> None:
         logging.critical("Login authentication error: Wrong username or password")
         logging.debug("Traceback: ", exc_info=True)
         sys.exit(ExitCode.INVALID_LOGIN_INFORMATION.value)
+    # Print out all ids of user's comments, in newest order
+    praw_get_my_comments(reddit.user.me())
+    praw_get_my_submissions(reddit.user.me())
+    # Successful exit
+    sys.exit(ExitCode.SUCCESS.value)
