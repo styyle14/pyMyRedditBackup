@@ -15,8 +15,10 @@ pymyredditbackup = 'pymyredditbackup.pymyredditbackup:main'
 
 [tool.poetry.dependencies]
 python = "^3.7"
+dacite = "^1.3"
 praw = "^6.5"
 prawcore = "*"
+pyyaml = "^5.3"
 
 [tool.poetry.dev-dependencies]
 cohesion = "*"

@@ -2,6 +2,7 @@
 """Contains the main package functionality."""
 
 import argparse
+import dataclasses
 import enum
 import getpass
 import logging
@@ -10,19 +11,47 @@ import pathlib
 import shutil
 import sys
 import tempfile
+import typing
+
+import dacite
 
 import praw
 
 import prawcore
 
+import yaml
 
-class ExitCode(enum.Enum):  # noqa: H601
+
+dataclass = dataclasses.dataclass
+field = dataclasses.field
+List = typing.List
+
+
+class ExitCode(enum.Enum):
     """Provides exit codes for scripts."""
 
     SUCCESS = 0
     INVALID_PRAW_INI_FILE = 1
     INVALID_CLIENT_INFORMATION = 2
     INVALID_LOGIN_INFORMATION = 3
+
+
+@dataclass
+class RedditMessage:
+    """Holds the userdata."""
+
+    author: str
+    title: str
+    date: str
+    content: str
+
+
+@dataclass
+class RedditUserData:
+    """Holds the userdata."""
+
+    username: str
+    message_list: List[RedditMessage] = field(default_factory=list)
 
 
 def praw_reddit_from_ini(praw_ini_path: str) -> praw.Reddit:
@@ -54,7 +83,7 @@ def praw_get_my_submissions(redditor: praw.models.Redditor) -> None:
 
 def praw_get_my_saved(redditor: praw.models.Redditor) -> None:
     """Get the redditor's comments."""
-    for thing in redditor.saved(limit=None):
+    for thing in redditor.saved(limit=10):
         if isinstance(thing, praw.models.Submission):
             logging.info("Saved submission: %s", thing.title)
         elif isinstance(thing, praw.models.Comment):
@@ -63,7 +92,7 @@ def praw_get_my_saved(redditor: praw.models.Redditor) -> None:
 
 def praw_get_my_upvoted(redditor: praw.models.Redditor) -> None:
     """Get the redditor's comments."""
-    for thing in redditor.upvoted(limit=None):
+    for thing in redditor.upvoted(limit=10):
         if isinstance(thing, praw.models.Submission):
             logging.info("Upvoted submission: %s", thing.title)
         elif isinstance(thing, praw.models.Comment):
@@ -72,7 +101,7 @@ def praw_get_my_upvoted(redditor: praw.models.Redditor) -> None:
 
 def praw_get_my_messages(reddit: praw.Reddit) -> None:
     """Get the redditor's comments."""
-    for message in reddit.inbox.all(limit=None):
+    for message in reddit.inbox.all(limit=10):
         if isinstance(message, praw.models.Message):
             logging.info("Message subject: %s", message.subject)
 
@@ -94,6 +123,22 @@ def main() -> None:
     else:
         logging.basicConfig(level=logging.INFO)
     # Get absolute praw.ini file path
+    msg = RedditMessage("me", "hello", "today", "hello there.")
+    msg_list = [msg]
+    me = RedditUserData("gg", msg_list)
+    logging.info(me)
+    dd = dataclasses.asdict(me)
+    yd = yaml.dump(dd)
+    logging.info(yd)
+    dd2 = yaml.load(yd, Loader=yaml.SafeLoader)
+    logging.info(dd2)
+    me2 = dacite.from_dict(data_class=RedditUserData, data=dd2)
+    logging.info(me2)
+    if me == me2:
+        logging.info("works")
+    else:
+        logging.info("doesn't works")
+    sys.exit()
     praw_ini_path = os.path.abspath(args.praw_ini)
     # Check if praw.ini file exists
     if os.path.isfile(praw_ini_path):
