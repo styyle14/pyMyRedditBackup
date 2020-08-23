@@ -19,6 +19,7 @@ praw = "^6.5"
 prawcore = "*"
 
 [tool.poetry.dev-dependencies]
+black = { version = "*", allow-prereleases = true }
 cohesion = "*"
 flake8 = "^3"
 flake8-2020 = "*"
